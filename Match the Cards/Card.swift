@@ -14,11 +14,18 @@ class Card {
     private var isMatched = false
     
     func getImgName() -> String {
-        return imgName
+        return self.imgName
     }
     
     func setImgName(name:String) {
-        imgName = name
+        self.imgName = name
     }
     
+    func getIsFlipped() -> Bool {
+        return self.isFlipped
+    }
+    
+    func toggleIsFlipped() {
+        self.isFlipped = !self.isFlipped
+    }
 }
