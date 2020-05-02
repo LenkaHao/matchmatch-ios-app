@@ -27,9 +27,6 @@ class CardModel {
                 card.setImgName(name: "card\(random)")
                 cards.append(card)
             }
-            
-            //test
-            print(random)
         }
         
         // randomize card sequence
