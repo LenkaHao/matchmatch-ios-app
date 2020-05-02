@@ -14,6 +14,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     var model = CardModel()
     var cardArray = [Card]()
+    var firstFlippedCardIndex:IndexPath?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,7 +25,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         cardArray = model.getCards()
     }
     
-    /******* Protocols ******/
+    // MARK: - Protocols
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return cardArray.count
@@ -48,12 +49,48 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let card = cardArray[indexPath.row]
         
         // flip according to the current status
-        if !card.getIsFlipped() {
+        if !card.getIsFlipped() && !card.getIsMatched() {
             cell.flipToFront()
+            card.toggleIsFlipped()
+            if firstFlippedCardIndex == nil {
+                firstFlippedCardIndex = indexPath
+            }
+            else {
+                self.isMatching(indexPath)
+            }
         }
+    }
+    
+    // MARK: - Game logic
+    
+    func isMatching(_ secondFlippedCardIndex:IndexPath) {
+        
+        let firstCard = cardArray[firstFlippedCardIndex!.row]
+        let secondCard = cardArray[secondFlippedCardIndex.row]
+        
+        let firstCardCell = collectionView.cellForItem(at: firstFlippedCardIndex!) as? CardCollectionViewCell
+        let secondCardCell = collectionView.cellForItem(at: secondFlippedCardIndex) as? CardCollectionViewCell
+        
+        // if match: set card property, remove the cards
+        if firstCard.getImgName() == secondCard.getImgName() {
+            firstCard.setIsMatched()
+            secondCard.setIsMatched()
+            firstCardCell?.removeFromView()
+            secondCardCell?.removeFromView()
+        }
+        // if not a match: set card property, flip cards back
         else {
-            cell.flipToBack()
+            firstCard.toggleIsFlipped()
+            secondCard.toggleIsFlipped()
+            firstCardCell?.flipToBack()
+            secondCardCell?.flipToBack()
         }
-        card.toggleIsFlipped()
+        
+        // force reload the first card when it's recycled and becomes nil
+        if firstCardCell == nil {
+            collectionView.reloadItems(at: [firstFlippedCardIndex!])
+        }
+    
+        firstFlippedCardIndex = nil
     }
 }

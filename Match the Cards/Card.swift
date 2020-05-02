@@ -28,4 +28,12 @@ class Card {
     func toggleIsFlipped() {
         self.isFlipped = !self.isFlipped
     }
+    
+    func getIsMatched() -> Bool {
+        return self.isMatched
+    }
+    
+    func setIsMatched() {
+        self.isMatched = true
+    }
 }
