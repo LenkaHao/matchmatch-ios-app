@@ -10,11 +10,14 @@ import UIKit
 
 class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
     
+    @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var collectionView: UICollectionView!
     
     var model = CardModel()
     var cardArray = [Card]()
     var firstFlippedCardIndex:IndexPath?
+    var timer:Timer?
+    var milliseconds:Float = 10 * 1000
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,6 +26,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         collectionView.dataSource = self
         
         cardArray = model.getCards()
+        
+        timer = Timer.scheduledTimer(timeInterval: 0.001, target: self, selector: #selector(timerElapsed), userInfo: nil, repeats: true)
+        RunLoop.main.add(timer!, forMode: .common)
     }
     
     // MARK: - Protocols
@@ -58,6 +64,18 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             else {
                 self.isMatching(indexPath)
             }
+        }
+    }
+    
+    // MARK: - Timer
+    
+    @objc func timerElapsed() {
+        milliseconds -= 1
+        let timerText = String(format: "%.2f", milliseconds/1000)
+        timerLabel.text = "Time Remaining: \(timerText)"
+        
+        if milliseconds <= 0 {
+            timer?.invalidate()
         }
     }
     
