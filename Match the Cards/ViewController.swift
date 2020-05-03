@@ -15,9 +15,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     var model = CardModel()
     var cardArray = [Card]()
+    var tobeMatched = 0
     var firstFlippedCardIndex:IndexPath?
     var timer:Timer?
-    var milliseconds:Float = 10 * 1000
+    var milliseconds:Float = 25 * 1000
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,6 +27,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         collectionView.dataSource = self
         
         cardArray = model.getCards()
+        tobeMatched = cardArray.count
         
         timer = Timer.scheduledTimer(timeInterval: 0.001, target: self, selector: #selector(timerElapsed), userInfo: nil, repeats: true)
         RunLoop.main.add(timer!, forMode: .common)
@@ -49,6 +51,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        if milliseconds <= 0 {
+            return
+        }
         
         // select cell and card
         let cell = collectionView.cellForItem(at: indexPath) as! CardCollectionViewCell
@@ -76,6 +82,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         if milliseconds <= 0 {
             timer?.invalidate()
+            timerLabel.textColor = UIColor.red
+            checkWinning()
         }
     }
     
@@ -95,6 +103,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             secondCard.setIsMatched()
             firstCardCell?.removeFromView()
             secondCardCell?.removeFromView()
+            tobeMatched -= 2
+            checkWinning()
         }
         // if not a match: set card property, flip cards back
         else {
@@ -110,5 +120,38 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
     
         firstFlippedCardIndex = nil
+    }
+    
+    func checkWinning() {
+        var title = ""
+        var message = ""
+        
+        // user wins
+        if tobeMatched == 0 {
+            if milliseconds > 0 {
+                timer?.invalidate()
+            }
+            title = "Congratulations!"
+            message = "You won this game"
+            showAlert(title, message)
+        }
+        // next round
+        else if milliseconds > 0 {
+            return
+        }
+        // use loses
+        else {
+            title = "Game Over"
+            message = "You lost"
+            showAlert(title, message)
+        }
+    }
+    
+    // MARK: - Alert
+    func showAlert(_ title:String, _ message:String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
     }
 }
